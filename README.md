@@ -1,58 +1,39 @@
-Here is a more **structured and professional** `README.md` with clear headings and sections:
+# Adobe Hackathon Challenge 1B - Docker Setup
 
-```markdown
-# Adobe Hackathon Challenge – Outline Extractor
+A Dockerized solution for persona-driven document intelligence using advanced RAG (Retrieval-Augmented Generation) pipeline.
 
-This project is designed to extract outlines and structured information from PDF collections using NLP and machine learning models.  
-The solution is containerized using Docker to ensure consistent and reproducible results.
+## 📁 Project Structure
 
----
-
-## 📂 Project Structure
+```
+adobe-hackathon-challenge1b-master/
+├── Collection_1/                  # Travel Planning documents
+├── Collection_2/                  # Adobe Acrobat Learning documents  
+├── Collection_3/                  # Recipe Collection documents
+├── Scripts/                       # Python executables and cache
+├── venv/                         # Virtual environment (excluded from Docker)
+├── .dockerignore                 # Docker build exclusions
+├── .gitignore                    # Git exclusions
+├── Dockerfile                    # Docker build configuration
+├── README.md                     # This file
+├── requirements.txt              # Python dependencies
+└── run_analysis.py              # Main analysis script
 ```
 
-adobe-hackathon-challenge1b-master/
-├── Collection\_1/                # Input PDF files for collection 1
-├── Collection\_2/                # Input PDF files for collection 2
-├── Collection\_3/                # Input PDF files for collection 3
-├── Scripts/                     # Helper scripts and utilities
-│   ├── dumppdf.py
-│   ├── pdf2txt.py
-│   └── ...
-├── venv/                        # Local virtual environment (excluded in Docker)
-├── Dockerfile                   # Dockerfile for building the container
-├── requirements.txt             # Python dependencies
-├── run\_analysis.py              # Main script to process PDF collections
-├── approach\_explanation.md      # Documentation of the approach
-└── README.md                    # Project documentation
-
-````
-
----
-
-## 🛠️ Prerequisites
-- **Docker** installed on your system
-- Input PDFs placed inside `Collection_1`, `Collection_2`, or `Collection_3`
-
----
-
-## 🚀 Usage Guide
+## 🚀 Quick Start
 
 ### 1. Build the Docker Image
-Run the following command in the project root directory:
 
 ```bash
 docker build -t adobe-challenge .
-````
+```
 
----
+**Expected Build Time:**
+- **First build**: 25-35 minutes (downloads PyTorch + CUDA libraries ~1.5GB)
+- **Subsequent builds**: 30-60 seconds (uses cached layers)
 
-### 2. Run the Container
+### 2. Run Analysis on Collections
 
-You can process any collection by mounting it into the container:
-
-#### Process Collection 1
-
+**Collection 1 (Travel Planning):**
 ```bash
 docker run --rm \
   -v "$PWD/Collection_1:/app/Collection_1" \
@@ -60,8 +41,7 @@ docker run --rm \
   python run_analysis.py ./Collection_1/
 ```
 
-#### Process Collection 2
-
+**Collection 2 (Adobe Acrobat Learning):**
 ```bash
 docker run --rm \
   -v "$PWD/Collection_2:/app/Collection_2" \
@@ -69,8 +49,7 @@ docker run --rm \
   python run_analysis.py ./Collection_2/
 ```
 
-#### Process Collection 3
-
+**Collection 3 (Recipe Collection):**
 ```bash
 docker run --rm \
   -v "$PWD/Collection_3:/app/Collection_3" \
@@ -78,30 +57,220 @@ docker run --rm \
   python run_analysis.py ./Collection_3/
 ```
 
----
+## 📋 Prerequisites
 
-## ⚡ Performance Notes
+- **Docker**: Latest version installed
+- **System Requirements**:
+  - 10GB+ free disk space (for ML models and dependencies)
+  - 8GB+ RAM (4GB minimum)
+  - Stable internet connection for initial build
 
-* The first build may take time as it installs all dependencies, including heavy ML/NLP packages.
-* Use a `.dockerignore` file to exclude unnecessary files (`venv/`, `__pycache__/`, `*.log`, etc.) and speed up builds.
-* Subsequent builds will use cached layers unless dependencies change.
+## 🔧 Advanced Usage
 
----
+### Interactive Mode
+For debugging or running multiple collections:
 
-## 🐞 Troubleshooting
+```bash
+docker run --rm -it \
+  -v "$PWD:/app" \
+  adobe-challenge bash
 
-* **Build taking too long?**
-  Make sure your `.dockerignore` excludes large unused directories (like `venv/`).
-* **Platform mismatch warnings?**
-  You can safely ignore the `--platform` warning or remove the flag if not cross-compiling.
-* **Dependency errors (like `sentencepiece`)?**
-  Use a stable Python version like `3.11-slim` in the `Dockerfile`.
-
----
-
+# Inside container:
+python run_analysis.py ./Collection_1/
+python run_analysis.py ./Collection_2/
+python run_analysis.py ./Collection_3/
 ```
 
-Do you also want me to provide the **optimized `.dockerignore`** along with this final README?  
-I can add it as a section so that it’s fully self-contained. Shall I proceed?
+### Mount All Collections at Once
+```bash
+docker run --rm \
+  -v "$PWD:/app" \
+  adobe-challenge \
+  python run_analysis.py ./Collection_1/
 ```
+
+## 📁 Output Files
+
+Each analysis generates a JSON output file in the respective collection:
+- `Collection_1/challenge1b_output.json`
+- `Collection_2/challenge1b_output.json`
+- `Collection_3/challenge1b_output.json`
+
+## 🏗️ Build Process Details
+
+### What Gets Downloaded During Build:
+1. **Base Python image** (~100MB)
+2. **System dependencies** (build tools, gcc)
+3. **PyTorch** (~821MB) - Deep learning framework
+4. **CUDA libraries** (~600MB) - GPU acceleration support
+5. **Transformers & ML libraries** (~300MB)
+6. **Other dependencies** (~200MB)
+
+**Total download**: ~1.5-2GB
+
+### Build Stages:
+```
+[1/6] Base image setup               (~1 min)
+[2/6] System dependencies            (~2 min)  
+[3/6] Python requirements install    (~25-30 min)
+  ├── PyTorch download               (~10-15 min)
+  ├── CUDA libraries download        (~8-12 min)
+  └── Other ML libraries             (~5-8 min)
+[4/6] Copy application code          (~10 sec)
+[5/6] Cleanup & optimization         (~30 sec)
+[6/6] Final image assembly           (~10 sec)
+```
+
+## 🐛 Troubleshooting
+
+### Build Issues
+
+**Slow build times:**
+```bash
+# Use BuildKit for better performance
+DOCKER_BUILDKIT=1 docker build -t adobe-challenge .
+
+# Check available disk space
+docker system df
+```
+
+**Out of memory during build:**
+```bash
+# Close other applications
+# Increase Docker memory limit in Docker Desktop
+# Or build with limited parallelism:
+docker build --memory=4g -t adobe-challenge .
+```
+
+### Runtime Issues
+
+**Permission errors:**
+```bash
+# Ensure proper volume mounting
+docker run --rm -v "$PWD/Collection_1:/app/Collection_1" adobe-challenge python run_analysis.py ./Collection_1/
+```
+
+**Path issues with spaces:**
+```bash
+# Use quotes around paths
+docker run --rm -v "$PWD/Collection_1:/app/Collection_1" adobe-challenge python run_analysis.py ./Collection_1/
+```
+
+**Container not found:**
+```bash
+# Check if image exists
+docker images | grep adobe-challenge
+
+# Rebuild if missing
+docker build -t adobe-challenge .
+```
+
+## 🔍 Verification
+
+### Check Build Success
+```bash
+# List built images
+docker images adobe-challenge
+
+# Test Python installation
+docker run --rm adobe-challenge python --version
+
+# Test dependencies
+docker run --rm adobe-challenge python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+```
+
+### Validate Analysis
+```bash
+# Run on Collection_1 and check output
+docker run --rm -v "$PWD/Collection_1:/app/Collection_1" adobe-challenge python run_analysis.py ./Collection_1/
+
+# Verify output file exists
+ls -la Collection_1/challenge1b_output.json
+```
+
+## 🧹 Cleanup
+
+### Remove Built Images
+```bash
+# Remove specific image
+docker rmi adobe-challenge
+
+# Remove all unused images
+docker image prune -a
+```
+
+### Clean Build Cache
+```bash
+# Remove build cache
+docker builder prune
+
+# Complete cleanup (removes everything)
+docker system prune -a --volumes
+```
+
+## ⚡ Performance Tips
+
+1. **First build optimization**:
+   - Ensure stable internet connection
+   - Close memory-heavy applications
+   - Use SSD storage if available
+
+2. **Development workflow**:
+   - Keep the built image - rebuilds are fast
+   - Use interactive mode for testing
+   - Mount specific collections for targeted analysis
+
+3. **Resource monitoring**:
+   ```bash
+   # Monitor container resources
+   docker stats
+   
+   # Check disk usage
+   docker system df
+   ```
+
+## 🔬 Technical Details
+
+### Docker Features Used:
+- **Multi-stage build**: Optimized image size
+- **BuildKit**: Enhanced build performance  
+- **Volume mounting**: Access to host collections
+- **Automatic cleanup**: `--rm` flag removes containers after use
+
+### AI Models Loaded:
+- **Semantic search**: sentence-transformers model
+- **Title generation**: google/flan-t5-base
+- **Document processing**: PyTorch-based pipeline
+
+## 📊 Expected Performance
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| First build | 25-35 min | Downloads 1.5GB+ dependencies |
+| Rebuild (code changes) | 30-60 sec | Uses cached layers |
+| Collection_1 analysis | 2-5 min | Depends on document count |
+| Collection_2 analysis | 2-5 min | Depends on document count |  
+| Collection_3 analysis | 2-5 min | Depends on document count |
+
+## 🆘 Support
+
+### Common Error Messages:
+
+**"No space left on device"**
+```bash
+docker system prune -a
+df -h  # Check disk space
+```
+
+**"Error response from daemon: pull access denied"**
+```bash
+# Check image name spelling
+docker images
+docker build -t adobe-challenge .
+```
+
+- This is normal - models are loading into memory
+- Wait 1-2 minutes for initialization
+
+---
 
