@@ -35,26 +35,17 @@ docker build -t adobe-challenge .
 
 **Collection 1 (Travel Planning):**
 ```bash
-docker run --rm \
-  -v "$PWD/Collection_1:/app/Collection_1" \
-  adobe-challenge \
-  python run_analysis.py ./Collection_1/
+docker run --rm -v "${PWD}:/app" adobe-challenge python run_analysis.py ./Collection_1/
 ```
 
 **Collection 2 (Adobe Acrobat Learning):**
 ```bash
-docker run --rm \
-  -v "$PWD/Collection_2:/app/Collection_2" \
-  adobe-challenge \
-  python run_analysis.py ./Collection_2/
+docker run --rm -v "${PWD}:/app" adobe-challenge python run_analysis.py ./Collection_2/
 ```
 
 **Collection 3 (Recipe Collection):**
 ```bash
-docker run --rm \
-  -v "$PWD/Collection_3:/app/Collection_3" \
-  adobe-challenge \
-  python run_analysis.py ./Collection_3/
+docker run --rm -v "${PWD}:/app" adobe-challenge python run_analysis.py ./Collection_3/
 ```
 
 ## 📋 Prerequisites
