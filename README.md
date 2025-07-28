@@ -96,30 +96,6 @@ Each analysis generates a JSON output file in the respective collection:
 - `Collection_2/challenge1b_output.json`
 - `Collection_3/challenge1b_output.json`
 
-## 🏗️ Build Process Details
-
-### What Gets Downloaded During Build:
-1. **Base Python image** (~100MB)
-2. **System dependencies** (build tools, gcc)
-3. **PyTorch** (~821MB) - Deep learning framework
-4. **CUDA libraries** (~600MB) - GPU acceleration support
-5. **Transformers & ML libraries** (~300MB)
-6. **Other dependencies** (~200MB)
-
-**Total download**: ~1.5-2GB
-
-### Build Stages:
-```
-[1/6] Base image setup               (~1 min)
-[2/6] System dependencies            (~2 min)  
-[3/6] Python requirements install    (~25-30 min)
-  ├── PyTorch download               (~10-15 min)
-  ├── CUDA libraries download        (~8-12 min)
-  └── Other ML libraries             (~5-8 min)
-[4/6] Copy application code          (~10 sec)
-[5/6] Cleanup & optimization         (~30 sec)
-[6/6] Final image assembly           (~10 sec)
-```
 
 ## 🐛 Troubleshooting
 
@@ -242,16 +218,6 @@ docker system prune -a --volumes
 - **Title generation**: google/flan-t5-base
 - **Document processing**: PyTorch-based pipeline
 
-## 📊 Expected Performance
-
-| Operation | Time | Notes |
-|-----------|------|-------|
-| First build | 25-35 min | Downloads 1.5GB+ dependencies |
-| Rebuild (code changes) | 30-60 sec | Uses cached layers |
-| Collection_1 analysis | 2-5 min | Depends on document count |
-| Collection_2 analysis | 2-5 min | Depends on document count |  
-| Collection_3 analysis | 2-5 min | Depends on document count |
-
 ## 🆘 Support
 
 ### Common Error Messages:
@@ -268,9 +234,4 @@ df -h  # Check disk space
 docker images
 docker build -t adobe-challenge .
 ```
-
-- This is normal - models are loading into memory
-- Wait 1-2 minutes for initialization
-
----
 
